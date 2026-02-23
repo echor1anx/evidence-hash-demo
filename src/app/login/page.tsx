@@ -1,36 +1,76 @@
-// version 1 - Separate Login and Register pages with basic forms and links to switch between them.
 "use client";
-import React from 'react';
+
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import AuthLayout from '@/components/AuthLayout';
+import Link from 'next/link';
+import { Mail, KeyRound } from 'lucide-react';
+import { useAuth, UserRole } from '@/context/AuthContext';
 
 export default function LoginPage() {
+  const router = useRouter();
+  const { login } = useAuth();
+  
+  const [email, setEmail] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    
+    // Quick mock for roles during login presentation
+    let roleToAssign: UserRole = 'Investigator';
+    if (email.includes('admin')) roleToAssign = 'Admin';
+    if (email.includes('custodian')) roleToAssign = 'Custodian';
+    if (email.includes('auditor')) roleToAssign = 'Auditor';
+
+    setTimeout(() => {
+      login(email || "officer@agency.gov", roleToAssign, "Returning Officer");
+      router.push('/cases'); // Redirect to dashboard
+    }, 800);
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50">
-      <div className="max-w-md w-full p-8 bg-white shadow-lg rounded-xl border border-slate-200">
-        <h2 className="text-2xl font-bold text-center text-slate-800 mb-2">Evidence Locker</h2>
-        <p className="text-sm text-center text-slate-500 mb-8">Secure Chain-of-Custody Portal</p>
-        
-        <form className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-slate-700">Email Address</label>
-            <input type="email" placeholder="name@org.gov" className="w-full p-2 mt-1 border rounded-md focus:ring-2 focus:ring-blue-500 outline-none" required />
+    <AuthLayout title="Identity Verification" description="Please enter your secure credentials to proceed.">
+      <form className="space-y-6" onSubmit={handleLogin}>
+        <div className="space-y-2">
+          <label className="text-xs font-semibold uppercase tracking-widest text-slate-500 ml-1">Email ID</label>
+          <div className="relative group">
+            <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600 group-focus-within:text-blue-500 transition-colors" size={18} />
+            <input 
+              type="email" 
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="officer@agency.gov (Hint: type 'admin' or 'auditor')" 
+              className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:bg-white/10 transition-all placeholder:text-slate-600" 
+              required
+            />
           </div>
-          <div>
-            <label className="block text-sm font-medium text-slate-700">Password</label>
-            <input type="password" placeholder="••••••••" className="w-full p-2 mt-1 border rounded-md focus:ring-2 focus:ring-blue-500 outline-none" required />
+        </div>
+
+        <div className="space-y-2">
+          <label className="text-xs font-semibold uppercase tracking-widest text-slate-500 ml-1">Access Key</label>
+          <div className="relative group">
+            <KeyRound className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600 group-focus-within:text-blue-500 transition-colors" size={18} />
+            <input type="password" placeholder="••••••••" className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:bg-white/10 transition-all placeholder:text-slate-600" required />
           </div>
-          <button className="w-full bg-slate-900 text-white py-2 rounded-md hover:bg-slate-800 transition-colors font-semibold">
-            Login
-          </button>
-        </form>
-        
-        <p className="mt-6 text-center text-sm text-slate-600">
-          New officer? <a href="/register" className="text-blue-600 hover:underline">Register for access</a>
-        </p>
-      </div>
-    </div>
+        </div>
+
+        <button 
+          type="submit" 
+          disabled={loading}
+          className="w-full bg-white text-black font-bold py-4 rounded-2xl hover:bg-blue-500 hover:text-white transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg disabled:opacity-50 disabled:transform-none"
+        >
+          {loading ? 'Authenticating...' : 'Authenticate Access'}
+        </button>
+      </form>
+
+      <p className="mt-8 text-center text-sm text-slate-500">
+        Unauthorized? <Link href="/register" className="text-blue-400 font-bold hover:underline">Request Enrollment</Link>
+      </p>
+    </AuthLayout>
   );
 }
-
 
 /*
 version 2 - Combined Login/Register page with animated transitions and enhanced UI using Framer Motion and Lucide icons.
@@ -165,4 +205,39 @@ function InputField({ label, type, placeholder, icon }: any) {
   );
 }
 */
+/* version 1 - Separate Login and Register pages with basic forms and links to switch between them.
+"use client";
+import React from 'react';
+
+export default function LoginPage() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-slate-50">
+      <div className="max-w-md w-full p-8 bg-white shadow-lg rounded-xl border border-slate-200">
+        <h2 className="text-2xl font-bold text-center text-slate-800 mb-2">Evidence Locker</h2>
+        <p className="text-sm text-center text-slate-500 mb-8">Secure Chain-of-Custody Portal</p>
+        
+        <form className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-slate-700">Email Address</label>
+            <input type="email" placeholder="name@org.gov" className="w-full p-2 mt-1 border rounded-md focus:ring-2 focus:ring-blue-500 outline-none" required />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700">Password</label>
+            <input type="password" placeholder="••••••••" className="w-full p-2 mt-1 border rounded-md focus:ring-2 focus:ring-blue-500 outline-none" required />
+          </div>
+          <button className="w-full bg-slate-900 text-white py-2 rounded-md hover:bg-slate-800 transition-colors font-semibold">
+            Login
+          </button>
+        </form>
+        
+        <p className="mt-6 text-center text-sm text-slate-600">
+          New officer? <a href="/register" className="text-blue-600 hover:underline">Register for access</a>
+        </p>
+      </div>
+    </div>
+  );
+}
+*/
+
+
 

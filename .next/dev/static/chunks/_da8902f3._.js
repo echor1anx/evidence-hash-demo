@@ -59,11 +59,11 @@ const MOCK_CASES = [
 function CasesDashboard() {
     _s();
     const $ = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$compiler$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["c"])(16);
-    if ($[0] !== "461b370de25fc782c8801fd00ca664fbcf68791117437669788fd76bf0ed32bd") {
+    if ($[0] !== "60c52f4e6c35bab6ff417b95df87132b6ab9fa79d1622987b5256089c3d04041") {
         for(let $i = 0; $i < 16; $i += 1){
             $[$i] = Symbol.for("react.memo_cache_sentinel");
         }
-        $[0] = "461b370de25fc782c8801fd00ca664fbcf68791117437669788fd76bf0ed32bd";
+        $[0] = "60c52f4e6c35bab6ff417b95df87132b6ab9fa79d1622987b5256089c3d04041";
     }
     const { user } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$context$2f$AuthContext$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useAuth"])();
     const router = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$navigation$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRouter"])();
@@ -444,11 +444,11 @@ function _CasesDashboardMOCK_CASESMap(c) {
 }
 function StatCard(t0) {
     const $ = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$compiler$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["c"])(15);
-    if ($[0] !== "461b370de25fc782c8801fd00ca664fbcf68791117437669788fd76bf0ed32bd") {
+    if ($[0] !== "60c52f4e6c35bab6ff417b95df87132b6ab9fa79d1622987b5256089c3d04041") {
         for(let $i = 0; $i < 15; $i += 1){
             $[$i] = Symbol.for("react.memo_cache_sentinel");
         }
-        $[0] = "461b370de25fc782c8801fd00ca664fbcf68791117437669788fd76bf0ed32bd";
+        $[0] = "60c52f4e6c35bab6ff417b95df87132b6ab9fa79d1622987b5256089c3d04041";
     }
     const { icon, title, value, color } = t0;
     const t1 = `p-3 rounded-xl bg-white/5 ${color}`;

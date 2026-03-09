@@ -4,85 +4,144 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import AuthLayout from '@/components/AuthLayout';
 import Link from 'next/link';
-import { User, Mail, Lock, Building, Layers, BadgeCheck, Shield } from 'lucide-react';
-import { useAuth, UserRole } from '@/context/AuthContext';
+import { User, Mail, Lock, Building, Layers, BadgeCheck, Shield, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { UserRole } from '@/context/AuthContext';
 
 export default function RegisterPage() {
   const router = useRouter();
-  const { login } = useAuth();
-  
+
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [organization, setOrganization] = useState('');
+  const [department, setDepartment] = useState('');
   const [role, setRole] = useState<UserRole>('Investigator');
-  const [loading, setLoading] = useState(false);
 
-  const handleRegister = (e: React.FormEvent) => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    
-    // Mock registration delay
-    setTimeout(() => {
-      login(email || "officer@state.gov", role, name || "New Officer");
-      router.push('/cases'); // Redirect to dashboard after login
-    }, 1000);
+    setError('');
+    setSuccess('');
+
+    try {
+      const res = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name,
+          email,
+          password,
+          role,
+          organization,
+          department,
+          designation: 'Officer'
+        })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || 'Registration failed');
+      }
+
+      setSuccess('Your request has been sent to the admin. You will be able to log in once approved.');
+
+      // Optionally redirect after a few seconds
+      setTimeout(() => {
+        router.push('/login');
+      }, 5000);
+
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <AuthLayout title="Personnel Enrollment" description="Fill in your details to request access to the ledger.">
-      <form className="space-y-6" onSubmit={handleRegister}>
-        {/* Full Name & Email */}
-        <div className="grid grid-cols-1 gap-4">
-          <InputGroup label="Full Name" icon={<User size={18}/>} placeholder="James T. Kirk" value={name} onChange={(e: any) => setName(e.target.value)} />
-          <InputGroup label="Official Email ID" icon={<Mail size={18}/>} placeholder="kirk@starfleet.gov" type="email" value={email} onChange={(e: any) => setEmail(e.target.value)} required />
-          <InputGroup label="Master Password" icon={<Lock size={18}/>} placeholder="Minimum 12 chars" type="password" required />
-        </div>
 
-        {/* Role Selection (Crucial for RBAC) */}
-        <div className="space-y-2">
-          <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 ml-1">Assigned Role</label>
-          <div className="grid grid-cols-2 gap-3">
-            {(['Investigator', 'Custodian', 'Analyst', 'Auditor'] as UserRole[]).map((r) => (
-              <button
-                key={r}
-                type="button"
-                onClick={() => setRole(r)}
-                className={`py-3 px-4 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 border transition-all ${
-                  role === r 
-                    ? 'bg-blue-600/20 border-blue-500 text-blue-400 shadow-[0_0_15px_rgba(37,99,235,0.2)]' 
-                    : 'bg-white/[0.02] border-white/5 text-slate-400 hover:bg-white/[0.05]'
-                }`}
-              >
-                {r === 'Investigator' && <Shield size={16} />}
-                {r === 'Custodian' && <Lock size={16} />}
-                {r === 'Analyst' && <Layers size={16} />}
-                {r === 'Auditor' && <BadgeCheck size={16} />}
-                {r}
-              </button>
-            ))}
+      {success ? (
+        <div className="bg-green-500/10 border border-green-500/20 text-green-400 p-6 rounded-2xl flex flex-col items-center justify-center text-center gap-4 mb-6">
+          <CheckCircle2 size={48} className="text-green-500" />
+          <div>
+            <h3 className="text-lg font-bold mb-1">Request Submitted</h3>
+            <p className="text-sm opacity-90">{success}</p>
           </div>
-          <p className="text-xs text-slate-500 mt-2 ml-1">Role determines blockchain smart contract permissions.</p>
+          <Link href="/login" className="mt-2 bg-green-500/20 hover:bg-green-500/30 text-green-300 px-6 py-2 rounded-xl transition-colors text-sm font-semibold">
+            Return to Login
+          </Link>
         </div>
+      ) : (
+        <form className="space-y-6" onSubmit={handleRegister}>
 
-        {/* Professional Details Grid */}
-        <div className="grid grid-cols-2 gap-4">
-          <InputGroup label="Organization" icon={<Building size={16}/>} placeholder="State Police" />
-          <InputGroup label="Department" icon={<Layers size={16}/>} placeholder="Forensics" />
-        </div>
-        
-        <div className="pt-2">
-          <button 
-            type="submit" 
-            disabled={loading}
-            className="w-full bg-blue-600 text-white font-bold py-4 rounded-2xl hover:bg-blue-500 transition-all shadow-[0_10px_20px_-5px_rgba(37,99,235,0.4)] flex items-center justify-center gap-2 disabled:opacity-50"
-          >
-            {loading ? 'Enrolling on Blockchain...' : 'Request for Access'}
-          </button>
-        </div>
-      </form>
+          {error && (
+            <div className="bg-red-500/10 border border-red-500/20 text-red-400 p-4 rounded-xl flex items-start gap-3 text-sm">
+              <AlertCircle className="shrink-0 mt-0.5" size={16} />
+              <p>{error}</p>
+            </div>
+          )}
 
-      <p className="mt-8 text-center text-sm text-slate-500">
-        Existing Officer? <Link href="/login" className="text-blue-400 font-bold hover:underline">Return to Login</Link>
-      </p>
+          {/* Full Name & Email */}
+          <div className="grid grid-cols-1 gap-4">
+            <InputGroup label="Full Name" icon={<User size={18} />} placeholder="James T. Kirk" value={name} onChange={(e: any) => setName(e.target.value)} required />
+            <InputGroup label="Official Email ID" icon={<Mail size={18} />} placeholder="kirk@starfleet.gov" type="email" value={email} onChange={(e: any) => setEmail(e.target.value)} required />
+            <InputGroup label="Master Password" icon={<Lock size={18} />} placeholder="Minimum 8 chars" type="password" value={password} onChange={(e: any) => setPassword(e.target.value)} required />
+          </div>
+
+          {/* Role Selection (Crucial for RBAC) */}
+          <div className="space-y-2">
+            <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 ml-1">Assigned Role</label>
+            <div className="grid grid-cols-2 gap-3">
+              {(['Investigator', 'Custodian', 'Analyst', 'Auditor', 'Admin'] as UserRole[]).map((r) => r && (
+                <button
+                  key={r}
+                  type="button"
+                  onClick={() => setRole(r)}
+                  className={`py-3 px-4 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 border transition-all ${role === r
+                      ? 'bg-blue-600/20 border-blue-500 text-blue-400 shadow-[0_0_15px_rgba(37,99,235,0.2)]'
+                      : 'bg-white/[0.02] border-white/5 text-slate-400 hover:bg-white/[0.05]'
+                    }`}
+                >
+                  {r === 'Investigator' && <Shield size={16} />}
+                  {r === 'Custodian' && <Lock size={16} />}
+                  {r === 'Analyst' && <Layers size={16} />}
+                  {r === 'Auditor' && <BadgeCheck size={16} />}
+                  {r === 'Admin' && <AlertCircle size={16} />}
+                  {r}
+                </button>
+              ))}
+            </div>
+            <p className="text-xs text-slate-500 mt-2 ml-1">Role determines blockchain smart contract permissions. (Admin added for testing)</p>
+          </div>
+
+          {/* Professional Details Grid */}
+          <div className="grid grid-cols-2 gap-4">
+            <InputGroup label="Organization" icon={<Building size={16} />} placeholder="State Police" value={organization} onChange={(e: any) => setOrganization(e.target.value)} required />
+            <InputGroup label="Department" icon={<Layers size={16} />} placeholder="Forensics" value={department} onChange={(e: any) => setDepartment(e.target.value)} required />
+          </div>
+
+          <div className="pt-2">
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-blue-600 text-white font-bold py-4 rounded-2xl hover:bg-blue-500 transition-all shadow-[0_10px_20px_-5px_rgba(37,99,235,0.4)] flex items-center justify-center gap-2 disabled:opacity-50"
+            >
+              {loading ? 'Submitting Request...' : 'Request for Access'}
+            </button>
+          </div>
+        </form>
+      )}
+
+      {!success && (
+        <p className="mt-8 text-center text-sm text-slate-500">
+          Existing Officer? <Link href="/login" className="text-blue-400 font-bold hover:underline">Return to Login</Link>
+        </p>
+      )}
     </AuthLayout>
   );
 }
@@ -96,13 +155,13 @@ function InputGroup({ label, icon, placeholder, type = "text", value, onChange, 
         <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600 group-focus-within:text-blue-500 transition-colors">
           {icon}
         </div>
-        <input 
+        <input
           type={type}
           value={value}
           onChange={onChange}
           placeholder={placeholder}
           required={required}
-          className="w-full bg-white/[0.03] border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500/40 transition-all placeholder:text-slate-700" 
+          className="w-full bg-white/[0.03] border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500/40 transition-all placeholder:text-slate-700"
         />
       </div>
     </div>

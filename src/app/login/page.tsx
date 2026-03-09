@@ -4,45 +4,67 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import AuthLayout from '@/components/AuthLayout';
 import Link from 'next/link';
-import { Mail, KeyRound } from 'lucide-react';
-import { useAuth, UserRole } from '@/context/AuthContext';
+import { Mail, KeyRound, AlertCircle } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
 
 export default function LoginPage() {
   const router = useRouter();
-  const { login } = useAuth();
-  
-  const [email, setEmail] = useState('');
-  const [loading, setLoading] = useState(false);
+  const { setUser } = useAuth();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    
-    // Quick mock for roles during login presentation
-    let roleToAssign: UserRole = 'Investigator';
-    if (email.includes('admin')) roleToAssign = 'Admin';
-    if (email.includes('custodian')) roleToAssign = 'Custodian';
-    if (email.includes('auditor')) roleToAssign = 'Auditor';
+    setError('');
 
-    setTimeout(() => {
-      login(email || "officer@agency.gov", roleToAssign, "Returning Officer");
-      router.push('/cases'); // Redirect to dashboard
-    }, 800);
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || 'Login failed');
+      }
+
+      setUser(data.user);
+      router.push('/cases');
+
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <AuthLayout title="Identity Verification" description="Please enter your secure credentials to proceed.">
       <form className="space-y-6" onSubmit={handleLogin}>
+
+        {error && (
+          <div className="bg-red-500/10 border border-red-500/20 text-red-400 p-4 rounded-xl flex items-start gap-3 text-sm">
+            <AlertCircle className="shrink-0 mt-0.5" size={16} />
+            <p>{error}</p>
+          </div>
+        )}
+
         <div className="space-y-2">
           <label className="text-xs font-semibold uppercase tracking-widest text-slate-500 ml-1">Email ID</label>
           <div className="relative group">
             <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600 group-focus-within:text-blue-500 transition-colors" size={18} />
-            <input 
-              type="email" 
+            <input
+              type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="officer@agency.gov (Hint: type 'admin' or 'auditor')" 
-              className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:bg-white/10 transition-all placeholder:text-slate-600" 
+              placeholder="officer@agency.gov"
+              className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:bg-white/10 transition-all placeholder:text-slate-600"
               required
             />
           </div>
@@ -52,12 +74,19 @@ export default function LoginPage() {
           <label className="text-xs font-semibold uppercase tracking-widest text-slate-500 ml-1">Access Key</label>
           <div className="relative group">
             <KeyRound className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600 group-focus-within:text-blue-500 transition-colors" size={18} />
-            <input type="password" placeholder="••••••••" className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:bg-white/10 transition-all placeholder:text-slate-600" required />
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
+              className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:bg-white/10 transition-all placeholder:text-slate-600"
+              required
+            />
           </div>
         </div>
 
-        <button 
-          type="submit" 
+        <button
+          type="submit"
           disabled={loading}
           className="w-full bg-white text-black font-bold py-4 rounded-2xl hover:bg-blue-500 hover:text-white transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg disabled:opacity-50 disabled:transform-none"
         >

@@ -1,11 +1,10 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
-// Define the valid roles in our system
 export type UserRole = "Investigator" | "Custodian" | "Analyst" | "Auditor" | "Admin" | null;
 
-// Define the structure of our mock User
 export interface User {
   id: string;
   name: string;
@@ -14,59 +13,66 @@ export interface User {
   organization: string;
 }
 
-// Define the shape of our Auth Context
 interface AuthContextType {
   user: User | null;
-  login: (email: string, role: UserRole, name?: string) => void;
-  logout: () => void;
+  setUser: (user: User | null) => void;
+  logout: () => Promise<void>;
+  isLoading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [isLoaded, setIsLoaded] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
 
-  // For the presentation/prototype, we'll persist the mock login in localStorage
   useEffect(() => {
-    const storedUser = localStorage.getItem("evidence-locker-user");
-    if (storedUser) {
-      try {
-        setUser(JSON.parse(storedUser));
-      } catch (e) {
-        console.error("Failed to parse stored user", e);
-      }
+    // Purge any old mock data from previous version to prevent infinite login loops
+    try {
+      localStorage.removeItem("evidence-locker-user");
+    } catch (e) {
+      // ignore
     }
-    setIsLoaded(true);
+
+    // Check if user is logged in via actual backend HTTP-only cookie
+    const checkAuthStatus = async () => {
+      try {
+        const res = await fetch("/api/auth/me");
+        if (res.ok) {
+          const data = await res.json();
+          setUser(data.user);
+        } else {
+          setUser(null);
+        }
+      } catch (error) {
+        console.error("Auth check failed", error);
+        setUser(null);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    checkAuthStatus();
   }, []);
 
-  const login = (email: string, role: UserRole, name: string = "Jane Doe") => {
-    const newUser: User = {
-      id: Math.random().toString(36).substring(7),
-      name,
-      email,
-      role,
-      organization: "State Internal",
-    };
-    setUser(newUser);
-    localStorage.setItem("evidence-locker-user", JSON.stringify(newUser));
+  const logout = async () => {
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+      setUser(null);
+      router.push("/login");
+    } catch (error) {
+      console.error("Logout failed", error);
+    }
   };
-
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem("evidence-locker-user");
-  };
-
-  if (!isLoaded) return null; // Avoid hydration mismatch
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, setUser, logout, isLoading }}>
       {children}
     </AuthContext.Provider>
   );
 }
 
-// Custom hook to easily grab auth data
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {

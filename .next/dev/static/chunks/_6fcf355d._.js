@@ -447,11 +447,11 @@ const MOCK_EVIDENCE_DB = [
 function CaseDetails() {
     _s();
     const $ = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$compiler$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["c"])(39);
-    if ($[0] !== "d761e30f030e30241438f41342c963d0278ff8f502210fd4513020c22cc8bcd7") {
+    if ($[0] !== "99b1248a8373f13f8e0c48a8a53bfa34ab21309e3bf5d9dcd0564c5013307aab") {
         for(let $i = 0; $i < 39; $i += 1){
             $[$i] = Symbol.for("react.memo_cache_sentinel");
         }
-        $[0] = "d761e30f030e30241438f41342c963d0278ff8f502210fd4513020c22cc8bcd7";
+        $[0] = "99b1248a8373f13f8e0c48a8a53bfa34ab21309e3bf5d9dcd0564c5013307aab";
     }
     const { user } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$context$2f$AuthContext$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useAuth"])();
     const router = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$navigation$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRouter"])();

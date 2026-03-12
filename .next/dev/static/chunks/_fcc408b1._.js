@@ -394,7 +394,7 @@ function LoginPage() {
                 throw new Error(data.message || 'Login failed');
             }
             setUser(data.user);
-            router.push('/cases');
+            router.push('/dashboard');
         } catch (err) {
             setError(err.message);
         } finally{

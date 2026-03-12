@@ -191,15 +191,25 @@ async function GET() {
         });
     }
     await (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$lib$2f$mongodb$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["default"])();
-    // Fetch pending users
+    // Fetch pending users and total active users
     try {
         const pendingUsers = await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$models$2f$User$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["default"].find({
             status: 'pending'
         }).sort({
             createdAt: -1
         });
+        const approvedUsers = await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$models$2f$User$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["default"].find({
+            status: 'approved'
+        }).select('-password').sort({
+            createdAt: -1
+        });
+        const totalUsersCount = await __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$models$2f$User$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["default"].countDocuments({
+            status: 'approved'
+        });
         return __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$server$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__["NextResponse"].json({
-            users: pendingUsers
+            users: pendingUsers,
+            approvedUsers: approvedUsers,
+            totalUsers: totalUsersCount
         }, {
             status: 200
         });

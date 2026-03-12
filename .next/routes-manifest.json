@@ -22,12 +22,44 @@
   },
   "dynamicRoutes": [
     {
+      "page": "/api/admin/requests/[id]",
+      "regex": "^/api/admin/requests/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/api/admin/requests/(?<nxtPid>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/api/cases/[id]",
+      "regex": "^/api/cases/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/api/cases/(?<nxtPid>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/api/custody/[caseId]",
+      "regex": "^/api/custody/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPcaseId": "nxtPcaseId"
+      },
+      "namedRegex": "^/api/custody/(?<nxtPcaseId>[^/]+?)(?:/)?$"
+    },
+    {
       "page": "/cases/[id]",
       "regex": "^/cases/([^/]+?)(?:/)?$",
       "routeKeys": {
         "nxtPid": "nxtPid"
       },
       "namedRegex": "^/cases/(?<nxtPid>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/dashboard/cases/[id]",
+      "regex": "^/dashboard/cases/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/dashboard/cases/(?<nxtPid>[^/]+?)(?:/)?$"
     }
   ],
   "staticRoutes": [
@@ -50,16 +82,82 @@
       "namedRegex": "^/_not\\-found(?:/)?$"
     },
     {
+      "page": "/admin/requests",
+      "regex": "^/admin/requests(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin/requests(?:/)?$"
+    },
+    {
+      "page": "/api/admin/requests",
+      "regex": "^/api/admin/requests(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/admin/requests(?:/)?$"
+    },
+    {
+      "page": "/api/auth/login",
+      "regex": "^/api/auth/login(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/auth/login(?:/)?$"
+    },
+    {
+      "page": "/api/auth/logout",
+      "regex": "^/api/auth/logout(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/auth/logout(?:/)?$"
+    },
+    {
+      "page": "/api/auth/me",
+      "regex": "^/api/auth/me(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/auth/me(?:/)?$"
+    },
+    {
+      "page": "/api/auth/register",
+      "regex": "^/api/auth/register(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/auth/register(?:/)?$"
+    },
+    {
+      "page": "/api/cases",
+      "regex": "^/api/cases(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/cases(?:/)?$"
+    },
+    {
+      "page": "/api/custody",
+      "regex": "^/api/custody(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/custody(?:/)?$"
+    },
+    {
       "page": "/api/upload",
       "regex": "^/api/upload(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/api/upload(?:/)?$"
     },
     {
+      "page": "/api/users/investigators",
+      "regex": "^/api/users/investigators(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/users/investigators(?:/)?$"
+    },
+    {
       "page": "/cases",
       "regex": "^/cases(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/cases(?:/)?$"
+    },
+    {
+      "page": "/dashboard",
+      "regex": "^/dashboard(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/dashboard(?:/)?$"
+    },
+    {
+      "page": "/dashboard/cases/new",
+      "regex": "^/dashboard/cases/new(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/dashboard/cases/new(?:/)?$"
     },
     {
       "page": "/favicon.ico",

@@ -2,3 +2,6 @@
 [00:00:04.985] Server  LOG     ○ Compiling /cases ...
 [00:00:08.645] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
 [00:01:22.591] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:34:09.300] Server  LOG     ✓ Compiled in 1667ms
+[00:34:25.759] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:34:26.726] Browser ERROR   unhandledRejection: Error: Module [project]/Documents/GitHub/evidence-hash-demo/node_modules/next/dist/client/components/builtin/global-error.js [app-client] (ecmascript) was instantiated because it was required from module [project]/node_modules/next/dist/compiled/react-server-dom-turbopack/cjs/react-server-dom-turbopack-client.browser.development.js [app-client] (ecmascript), but the module factory is not available. It might have been deleted in an HMR update.

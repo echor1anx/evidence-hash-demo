@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 46, "column": 0}, "map": {"version":3,"sources":["file:///D:/evidence-hash-demo-main/src/app/api/auth/logout/route.ts"],"sourcesContent":["import { NextResponse } from 'next/server';\r\n\r\nexport async function POST() {\r\n    const response = NextResponse.json({ message: 'Logged out successfully' });\r\n\r\n    // Clear the cookie\r\n    response.cookies.delete('evidence_auth_token');\r\n\r\n    return response;\r\n}\r\n"],"names":[],"mappings":";;;;AAAA;;AAEO,eAAe;IAClB,MAAM,WAAW,gJAAY,CAAC,IAAI,CAAC;QAAE,SAAS;IAA0B;IAExE,mBAAmB;IACnB,SAAS,OAAO,CAAC,MAAM,CAAC;IAExB,OAAO;AACX"}}]
+}

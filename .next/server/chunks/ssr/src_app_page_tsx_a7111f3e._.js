@@ -1,3 +1,0 @@
-module.exports=[40777,a=>{"use strict";var b=a.i(87924),c=a.i(72131),d=a.i(50944),e=a.i(56025);function f(){let a=(0,d.useRouter)(),{user:f,isLoading:g}=(0,e.useAuth)();return(0,c.useEffect)(()=>{g||(f?a.push("/dashboard"):a.push("/login"))},[f,g,a]),(0,b.jsx)("div",{className:"flex justify-center items-center min-h-screen",children:(0,b.jsx)("p",{className:"text-xl",children:"Loading..."})})}a.s(["default",()=>f])}];
-
-//# sourceMappingURL=src_app_page_tsx_a7111f3e._.js.map

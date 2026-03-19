@@ -1,7 +1,0 @@
-[00:00:03.507] Server  LOG     ✓ Ready in 2.7s
-[00:08:03.983] Server  LOG     ○ Compiling /dashboard/cases/[id] ...
-[00:08:08.470] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-[00:11:49.517] Server  LOG     Evidence registered on blockchain. TX Hash: 0x21177f2761aefe93a84e970eca52f2f7518ea6b332cf6e3f8c2e5112ce76f400
-[00:11:49.523] Server  LOG     Evidence EV-69bae106-0-46f3ce63 registered on blockchain
-[00:36:21.701] Server  LOG     ○ Compiling /api/custody ...
-[19:51:55.866] Browser LOG     [ChromeTransport] chromePort disconnected

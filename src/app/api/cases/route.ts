@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import Case from "@/models/Case";
 import { verifyAuth } from "@/lib/verifyAuth"; // We need to create this helper
+import { registerEvidenceOnChain } from "@/lib/web3";
+import { v4 as uuidv4 } from "uuid";
 
 export async function GET(req: NextRequest) {
     try {
@@ -79,15 +81,54 @@ export async function POST(req: NextRequest) {
             status: "Open",
         });
 
+        // Register evidence on blockchain if available
+        if (evidence && evidence.length > 0) {
+            // Process blockchain registration asynchronously
+            const caseId = newCase._id.toString();
+            
+            for (let i = 0; i < evidence.length; i++) {
+                const e = evidence[i];
+                try {
+                    // Generate unique evidence ID
+                    const evidenceId = `EV-${caseId.slice(0, 8)}-${i}-${uuidv4().slice(0, 8)}`;
+                    
+                    // Register on blockchain
+                    const blockchainResult = await registerEvidenceOnChain(
+                        evidenceId,
+                        caseId,
+                        e.hash
+                    );
+                    
+                    // Update evidence with blockchain transaction details
+                    newCase.evidence[i] = {
+                        ...e,
+                        blockchainTxHash: blockchainResult.transactionHash,
+                        blockNumber: blockchainResult.blockNumber,
+                    };
+                    
+                    console.log(`Evidence ${evidenceId} registered on blockchain`);
+                } catch (blockchainError) {
+                    // Log the error but don't fail the case creation
+                    console.error(`Failed to register evidence on blockchain: ${blockchainError}`);
+                    console.warn("Evidence saved to MongoDB but blockchain registration failed");
+                }
+            }
+            
+            // Save updated case with blockchain transaction hashes
+            await newCase.save();
+        }
+
         // Initialize Chain of Custody logs for any uploaded evidence
         if (evidence && evidence.length > 0) {
-            const custodyLogs = evidence.map((e: any) => ({
+            const custodyLogs = evidence.map((e: any, i: number) => ({
                 caseId: newCase._id,
                 evidenceHash: e.hash,
                 action: "Uploaded",
                 performedBy: user.id,
                 locationStatus: "System Intake",
                 notes: "Initial evidence upload during ledger creation.",
+                blockchainTxHash: newCase.evidence?.[i]?.blockchainTxHash || null,
+                blockNumber: newCase.evidence?.[i]?.blockNumber || null,
             }));
 
             // Dynamically import to avoid circular dependencies if any, though likely safe

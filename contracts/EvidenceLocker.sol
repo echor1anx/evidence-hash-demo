@@ -52,9 +52,35 @@ contract EvidenceLocker {
         _;
     }
 
+    modifier onlyCustodian() {
+        require(custodians[msg.sender], "Caller is not a Custodian");
+        _;
+    }
+
+    modifier onlyAuditor() {
+        require(auditors[msg.sender], "Caller is not an Auditor");
+        _;
+    }
+
     // --- Constructor ---
     constructor() {
         admin = msg.sender;
+        investigators[msg.sender] = true;
+        custodians[msg.sender] = true;
+        auditors[msg.sender] = true;
+    }
+
+    // --- Admin Role Management ---
+    function setInvestigator(address _user, bool _enabled) public onlyAdmin {
+        investigators[_user] = _enabled;
+    }
+
+    function setCustodian(address _user, bool _enabled) public onlyAdmin {
+        custodians[_user] = _enabled;
+    }
+
+    function setAuditor(address _user, bool _enabled) public onlyAdmin {
+        auditors[_user] = _enabled;
     }
 
     // --- Core Functions ---

@@ -45,6 +45,13 @@ const ChainOfCustodySchema = new Schema<IChainOfCustody>(
             type: String,
             required: true,
         },
+        blockchainTxHash: {
+            type: String,
+            index: true,
+        },
+        blockNumber: {
+            type: Number,
+        },
         timestamp: {
             type: Date,
             default: Date.now,

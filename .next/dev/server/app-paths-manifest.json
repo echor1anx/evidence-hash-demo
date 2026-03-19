@@ -1,7 +1,4 @@
 {
-  "/api/admin/requests/route": "app/api/admin/requests/route.js",
-  "/api/auth/login/route": "app/api/auth/login/route.js",
-  "/api/auth/logout/route": "app/api/auth/logout/route.js",
   "/api/auth/me/route": "app/api/auth/me/route.js",
   "/api/cases/[id]/route": "app/api/cases/[id]/route.js",
   "/api/cases/route": "app/api/cases/route.js",
@@ -12,7 +9,5 @@
   "/dashboard/cases/[id]/page": "app/dashboard/cases/[id]/page.js",
   "/dashboard/cases/new/page": "app/dashboard/cases/new/page.js",
   "/dashboard/page": "app/dashboard/page.js",
-  "/login/page": "app/login/page.js",
-  "/page": "app/page.js",
-  "/register/page": "app/register/page.js"
+  "/page": "app/page.js"
 }

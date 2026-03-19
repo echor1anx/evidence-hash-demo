@@ -14,6 +14,8 @@ export interface ICase extends Document {
         hash: string;
         fileUrl?: string;
         uploadedAt: Date;
+        blockchainTxHash?: string;
+        blockNumber?: number;
     }[];
     createdBy: mongoose.Types.ObjectId;
     assignedInvestigators: mongoose.Types.ObjectId[];
@@ -40,7 +42,9 @@ const CaseSchema = new Schema<ICase>(
                 hashAlgorithm: String,
                 hash: String,
                 fileUrl: String,
-                uploadedAt: { type: Date, default: Date.now }
+                uploadedAt: { type: Date, default: Date.now },
+                blockchainTxHash: String,
+                blockNumber: Number
             }
         ],
         createdBy: {

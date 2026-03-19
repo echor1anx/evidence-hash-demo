@@ -182,6 +182,24 @@ type RouteHandlerConfig<Route extends AppRouteHandlerRoutes = AppRouteHandlerRou
   type __Unused = __Check
 }
 
+// Validate ../../../src/app/api/blockchain/roles/route.ts
+{
+  type __IsExpected<Specific extends RouteHandlerConfig<"/api/blockchain/roles">> = Specific
+  const handler = {} as typeof import("../../../src/app/api/blockchain/roles/route.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
+// Validate ../../../src/app/api/blockchain/route.ts
+{
+  type __IsExpected<Specific extends RouteHandlerConfig<"/api/blockchain">> = Specific
+  const handler = {} as typeof import("../../../src/app/api/blockchain/route.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
 // Validate ../../../src/app/api/cases/[id]/route.ts
 {
   type __IsExpected<Specific extends RouteHandlerConfig<"/api/cases/[id]">> = Specific

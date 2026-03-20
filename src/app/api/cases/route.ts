@@ -127,7 +127,7 @@ export async function POST(req: NextRequest) {
                 performedBy: user.id,
                 locationStatus: "System Intake",
                 notes: "Initial evidence upload during ledger creation.",
-                blockchainTxHash: newCase.evidence?.[i]?.blockchainTxHash || null,
+                blockchainTxHash: newCase.evidence?.[i]?.txHash || null,
                 blockNumber: newCase.evidence?.[i]?.blockNumber || null,
             }));
 

@@ -8,14 +8,25 @@ export interface ICase extends Document {
     witnesses: string[];
     status: "Open" | "Closed" | "Pending";
     evidence: {
+        evidenceId: string;          // Required to link to Smart Contract
         fileName: string;
         fileSize: number;
         hashAlgorithm: string;
         hash: string;
         fileUrl?: string;
+        // Blockchain / IPFS fields
+        txHash?: string;             // Ethereum transaction hash from the blockchain
+        ipfsCID?: string;            // IPFS Content Identifier for file retrieval
+        contractEvidenceId?: string; // ID used on-chain (matches evidenceId)
+        blockNumber?: number;        // Block number when evidence was registered
+        onChainTimestamp?: number;   // Timestamp from blockchain event (Unix seconds)
         uploadedAt: Date;
+<<<<<<< Updated upstream
         blockchainTxHash?: string;
         blockNumber?: number;
+=======
+        accessCount: number;
+>>>>>>> Stashed changes
     }[];
     createdBy: mongoose.Types.ObjectId;
     assignedInvestigators: mongoose.Types.ObjectId[];
@@ -37,14 +48,26 @@ const CaseSchema = new Schema<ICase>(
         },
         evidence: [
             {
+                evidenceId: { type: String, required: true },
                 fileName: String,
                 fileSize: Number,
                 hashAlgorithm: String,
                 hash: String,
                 fileUrl: String,
+<<<<<<< Updated upstream
                 uploadedAt: { type: Date, default: Date.now },
                 blockchainTxHash: String,
                 blockNumber: Number
+=======
+                // Blockchain / IPFS fields
+                txHash: String,
+                ipfsCID: String,
+                contractEvidenceId: String,
+                blockNumber: Number,
+                onChainTimestamp: Number,
+                uploadedAt: { type: Date, default: Date.now },
+                accessCount: { type: Number, default: 0 }
+>>>>>>> Stashed changes
             }
         ],
         createdBy: {

@@ -81,7 +81,7 @@ export default function CaseDetails() {
         </div>
 
         {/* The Wow Factor Evidence Uploader */}
-        <EvidenceUploader onUploadComplete={handleNewEvidence} />
+        <EvidenceUploader caseId={caseId} onUploadComplete={handleNewEvidence} />
 
         {/* Existing Evidence Ledger */}
         <div className="bg-[#0f172a] border border-white/5 rounded-2xl p-6">

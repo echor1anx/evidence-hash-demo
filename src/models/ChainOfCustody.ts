@@ -89,11 +89,19 @@ import mongoose, { Schema, Document, Model } from "mongoose";
 
 export interface IChainOfCustody extends Document {
     caseId: mongoose.Types.ObjectId;
+<<<<<<< Updated upstream
     evidenceHash: string;
     action: "Uploaded" | "Checked Out" | "Checked In" | "Transferred" | "Hash Verified" | "Archived";
     performedBy: mongoose.Types.ObjectId;
     transferredTo?: mongoose.Types.ObjectId;
     locationStatus: string;
+=======
+    evidenceHash: string; // The file hash representing the evidence
+    action: "Uploaded" | "Checked Out" | "Checked In" | "Transferred" | "Hash Verified" | "Archived" | "Modified" | "Accessed";
+    performedBy: mongoose.Types.ObjectId; // User who performed the action
+    transferredTo?: mongoose.Types.ObjectId; // Optional: User who received the evidence
+    locationStatus: string; // e.g., "Secure Storage", "Analyst Desk"
+>>>>>>> Stashed changes
     notes: string;
 
     blockchainTxHash?: string; // ✅ added
@@ -116,7 +124,7 @@ const ChainOfCustodySchema = new Schema<IChainOfCustody>(
         },
         action: {
             type: String,
-            enum: ["Uploaded", "Checked Out", "Checked In", "Transferred", "Hash Verified", "Archived"],
+            enum: ["Uploaded", "Checked Out", "Checked In", "Transferred", "Hash Verified", "Archived", "Modified", "Accessed"],
             required: true,
         },
         performedBy: {

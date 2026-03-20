@@ -35,7 +35,7 @@ export default function LoginPage() {
       }
 
       setUser(data.user);
-      router.push('/cases');
+      router.push('/dashboard');
 
     } catch (err: any) {
       setError(err.message);

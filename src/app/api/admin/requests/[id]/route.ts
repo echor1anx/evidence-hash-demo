@@ -25,7 +25,7 @@ async function verifyAdmin() {
     }
 }
 
-export async function PUT(req: Request, { params }: { params: { id: string } }) {
+export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
     const isAdmin = await verifyAdmin();
     if (!isAdmin) {
         return NextResponse.json({ message: 'Unauthorized. Admin access required.' }, { status: 403 });

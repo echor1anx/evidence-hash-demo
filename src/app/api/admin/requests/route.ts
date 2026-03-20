@@ -37,10 +37,17 @@ export async function GET() {
 
     await dbConnect();
 
-    // Fetch pending users
+    // Fetch pending users and total active users
     try {
         const pendingUsers = await User.find({ status: 'pending' }).sort({ createdAt: -1 });
-        return NextResponse.json({ users: pendingUsers }, { status: 200 });
+        const approvedUsers = await User.find({ status: 'approved' }).select('-password').sort({ createdAt: -1 });
+        const totalUsersCount = await User.countDocuments({ status: 'approved' });
+
+        return NextResponse.json({ 
+            users: pendingUsers,
+            approvedUsers: approvedUsers,
+            totalUsers: totalUsersCount
+        }, { status: 200 });
     } catch (error: any) {
         return NextResponse.json({ message: 'Database error', error: error.message }, { status: 500 });
     }

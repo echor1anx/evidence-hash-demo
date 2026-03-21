@@ -8,16 +8,26 @@ export interface ICase extends Document {
     inCharges: string[];
     witnesses: string[];
     status: "Open" | "Closed" | "Pending";
+
     evidence: {
+        evidenceId: string;
         fileName: string;
         fileSize: number;
         hashAlgorithm: string;
         hash: string;
         fileUrl?: string;
-        uploadedAt: Date;
-        blockchainTxHash?: string;
+
+        // Blockchain / IPFS fields
+        txHash?: string;
+        ipfsCID?: string;
+        contractEvidenceId?: string;
         blockNumber?: number;
+        onChainTimestamp?: number;
+
+        accessCount: number;
+        uploadedAt: Date;
     }[];
+
     createdBy: mongoose.Types.ObjectId;
     assignedInvestigators: mongoose.Types.ObjectId[];
     createdAt: Date;
@@ -39,15 +49,23 @@ const CaseSchema = new Schema<ICase>(
         },
         evidence: [
             {
+                evidenceId: { type: String, required: true },
                 fileName: String,
                 fileSize: Number,
                 hashAlgorithm: String,
                 hash: String,
                 fileUrl: String,
+
+                // Blockchain / IPFS fields
+                txHash: String,
+                ipfsCID: String,
+                contractEvidenceId: String,
+                blockNumber: Number,
+                onChainTimestamp: Number,
+
+                accessCount: { type: Number, default: 0 },
                 uploadedAt: { type: Date, default: Date.now },
-                blockchainTxHash: String,
-                blockNumber: Number
-            }
+            },
         ],
         createdBy: {
             type: Schema.Types.ObjectId,
@@ -58,7 +76,7 @@ const CaseSchema = new Schema<ICase>(
             {
                 type: Schema.Types.ObjectId,
                 ref: "User",
-            }
+            },
         ],
     },
     { timestamps: true }

@@ -1,28 +1,34 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { UploadCloud, File, ShieldCheck, Loader2 } from "lucide-react";
+import { UploadCloud, File, ShieldCheck, Loader2, Wallet } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { uploadToIPFS } from "@/lib/ipfs";
+import { registerEvidence } from "@/lib/contract";
 
-export default function EvidenceUploader({ onUploadComplete }: { onUploadComplete?: (evidence: any) => void }) {
+interface EvidenceUploaderProps {
+  caseId: string;
+  onUploadComplete?: (evidence: any) => void;
+}
+
+export default function EvidenceUploader({ caseId, onUploadComplete }: EvidenceUploaderProps) {
   const { user } = useAuth();
   const [file, setFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isHashing, setIsHashing] = useState(false);
   const [hashResult, setHashResult] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadStatus, setUploadStatus] = useState<string>("");
 
-  // The 'Wow' factor: Calculate SHA-256 entirely in the browser
+  // Calculate SHA-256 hash client-side
   const calculateLocalHash = async (file: File) => {
     setIsHashing(true);
     try {
-      // Small artificial delay to show the "Hashing" animation for effect
-      await new Promise(resolve => setTimeout(resolve, 800));
-
+      await new Promise(resolve => setTimeout(resolve, 800)); // UI effect
       const arrayBuffer = await file.arrayBuffer();
       const hashBuffer = await crypto.subtle.digest('SHA-256', arrayBuffer);
       const hashArray = Array.from(new Uint8Array(hashBuffer));
       const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-      
       setHashResult(hashHex);
     } catch (err) {
       console.error("Hashing failed", err);
@@ -49,30 +55,76 @@ export default function EvidenceUploader({ onUploadComplete }: { onUploadComplet
     }
   }, []);
 
-  const handleSubmitToLedger = () => {
+  const handleSubmitToLedger = async () => {
     if (!file || !hashResult) return;
-    
-    // In a real app, this sends the HASH and METADATA (not the file) to the smart contract
-    const mockEvidenceRecord = {
-      id: "EV-" + Math.random().toString(36).substr(2, 6).toUpperCase(),
-      fileName: file.name,
-      hash: hashResult,
-      uploadedBy: user?.name,
-      role: user?.role,
-      timestamp: new Date().toISOString(),
-      status: "Verified on Ledger"
-    };
+    setIsUploading(true);
 
-    if (onUploadComplete) {
-      onUploadComplete(mockEvidenceRecord);
+    try {
+      // Step 1: Upload file to IPFS via Pinata
+      setUploadStatus("Uploading to IPFS...");
+      const ipfsCID = await uploadToIPFS(file);
+
+      // Step 2: Generate evidence ID
+      const evidenceId = "EV-" + Math.random().toString(36).substr(2, 6).toUpperCase();
+
+      // Step 3: Register on blockchain via MetaMask
+      setUploadStatus("Sign transaction in MetaMask...");
+      const receipt = await registerEvidence(evidenceId, hashResult, ipfsCID, caseId);
+
+      // Step 4: Save to MongoDB backend
+      setUploadStatus("Saving to database...");
+      const res = await fetch("/api/evidence/upload", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          caseId,
+          evidenceId,
+          fileName: file.name,
+          fileSize: file.size,
+          hashAlgorithm: "SHA-256",
+          hash: hashResult,
+          ipfsCID,
+          txHash: receipt.txHash,
+          blockNumber: receipt.blockNumber,
+          contractEvidenceId: evidenceId,
+        }),
+      });
+
+      if (!res.ok) throw new Error("Backend save failed");
+
+      // Success
+      if (onUploadComplete) {
+        onUploadComplete({
+          evidenceId,
+          fileName: file.name,
+          hash: hashResult,
+          ipfsCID,
+          txHash: receipt.txHash,
+          blockNumber: receipt.blockNumber,
+          uploadedBy: user?.name,
+          role: user?.role,
+          timestamp: new Date().toISOString(),
+          status: "Registered on Chain",
+        });
+      }
+
+      setFile(null);
+      setHashResult(null);
+      setUploadStatus("");
+    } catch (err: any) {
+      console.error("Upload failed:", err);
+      setUploadStatus("");
+      alert(
+        err.message?.includes("MetaMask") || err.message?.includes("ethereum")
+          ? "Please connect MetaMask to Sepolia testnet and ensure you have test ETH."
+          : `Upload failed: ${err.message}`
+      );
+    } finally {
+      setIsUploading(false);
     }
-    
-    // Reset form after 'upload'
-    setFile(null);
-    setHashResult(null);
   };
 
-  // RBAC protection - only Investigators (and Admins) should logically be the ones uploading net-new evidence to a case initially.
+  // RBAC protection
   if (user?.role !== 'Investigator' && user?.role !== 'Admin') {
     return (
       <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-6 text-center">
@@ -98,7 +150,7 @@ export default function EvidenceUploader({ onUploadComplete }: { onUploadComplet
         >
           <UploadCloud className="mb-4" size={40} />
           <p className="font-semibold mb-1">Drag & drop evidence file here</p>
-          <p className="text-xs mb-4">Local hashing ensures file never leaves your device prior to encryption</p>
+          <p className="text-xs mb-4">File will be stored on IPFS. Hash is computed locally before upload.</p>
           
           <label className="bg-white/10 hover:bg-white/20 text-white px-6 py-2 rounded-lg font-semibold cursor-pointer transition-colors text-sm">
             Browse Files
@@ -119,6 +171,7 @@ export default function EvidenceUploader({ onUploadComplete }: { onUploadComplet
             <button 
               onClick={() => { setFile(null); setHashResult(null); }}
               className="text-slate-500 hover:text-white text-sm"
+              disabled={isUploading}
             >
               Cancel
             </button>
@@ -144,12 +197,24 @@ export default function EvidenceUploader({ onUploadComplete }: { onUploadComplet
             ) : null}
           </div>
 
+          {/* Upload Status */}
+          {isUploading && uploadStatus && (
+            <div className="flex items-center gap-3 text-blue-400 bg-blue-500/10 p-4 rounded-xl border border-blue-500/20">
+              <Loader2 className="animate-spin" size={20} />
+              <span className="font-semibold text-sm">{uploadStatus}</span>
+            </div>
+          )}
+
           <button 
             onClick={handleSubmitToLedger}
-            disabled={isHashing || !hashResult}
+            disabled={isHashing || !hashResult || isUploading}
             className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-xl transition-all shadow-lg disabled:opacity-50 flex justify-center items-center gap-2"
           >
-            Sign & Register to Ledger
+            {isUploading ? (
+              <><Loader2 className="animate-spin" size={20} /> Processing...</>
+            ) : (
+              <><Wallet size={20} /> Sign & Register to Blockchain</>
+            )}
           </button>
         </div>
       )}

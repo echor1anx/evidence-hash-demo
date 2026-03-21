@@ -10,22 +10,20 @@ export async function GET(req: NextRequest) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
-        if (user.role !== "Investigator") {
-             return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-        }
-
         await dbConnect();
 
-        // Fetch all other approved investigators to allow sharing cases
-        const investigators = await User.find({ 
-            role: "Investigator", 
+        // Fetch all other approved users (excluding Admins) to allow transferring evidence
+        const users = await User.find({ 
             status: "approved",
+            role: { $ne: "Admin" },
             _id: { $ne: user.id } // Don't include the current user in the list
-        }).select("_id name email");
+        })
+        .select("_id name email role")
+        .sort({ role: 1, name: 1 });
 
-        return NextResponse.json(investigators, { status: 200 });
+        return NextResponse.json(users, { status: 200 });
     } catch (error) {
-        console.error("Error fetching investigators:", error);
+        console.error("Error fetching all users:", error);
         return NextResponse.json(
             { error: "Internal Server Error" },
             { status: 500 }

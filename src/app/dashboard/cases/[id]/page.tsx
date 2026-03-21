@@ -26,6 +26,7 @@ export default function ViewCase() {
 
     const [caseItem, setCaseItem] = useState<ICase | null>(null);
     const [custodyLogs, setCustodyLogs] = useState<ICustodyLog[]>([]);
+    const [allUsers, setAllUsers] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
@@ -36,7 +37,8 @@ export default function ViewCase() {
     const [logForm, setLogForm] = useState({
         action: "Checked Out",
         locationStatus: "Analyst Desk",
-        notes: ""
+        notes: "",
+        transferredTo: ""
     });
 
     const [verifyingHash, setVerifyingHash] = useState<string | null>(null);
@@ -51,9 +53,10 @@ export default function ViewCase() {
 
     const fetchCaseDetails = async () => {
         try {
-            const [caseRes, custodyRes] = await Promise.all([
+            const [caseRes, custodyRes, usersRes] = await Promise.all([
                 fetch(`/api/cases/${caseId}`),
-                fetch(`/api/custody/${caseId}`)
+                fetch(`/api/custody/${caseId}`),
+                fetch(`/api/users/all`)
             ]);
 
             if (caseRes.ok) {
@@ -68,6 +71,11 @@ export default function ViewCase() {
             if (custodyRes.ok) {
                 const custodyData = await custodyRes.json();
                 setCustodyLogs(custodyData);
+            }
+
+            if (usersRes.ok) {
+                const usersData = await usersRes.json();
+                setAllUsers(usersData);
             }
         } catch (err) {
             console.error("Error fetching data:", err);
@@ -89,20 +97,34 @@ export default function ViewCase() {
 
         setIsSubmittingLog(true);
         try {
+            let finalLocationStatus = logForm.locationStatus;
+            let transferredToId = undefined;
+
+            if (logForm.action === "Transferred" && logForm.transferredTo) {
+                transferredToId = logForm.transferredTo;
+                const targetUser = allUsers.find(u => u._id === logForm.transferredTo);
+                if (targetUser) {
+                    finalLocationStatus = `Transferred to ${targetUser.role} ${targetUser.name}`;
+                }
+            }
+
             const response = await fetch("/api/custody", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     caseId,
                     evidenceHash: selectedEvidence,
-                    ...logForm
+                    ...logForm,
+                    locationStatus: finalLocationStatus,
+                    transferredTo: transferredToId
                 }),
             });
 
             if (response.ok) {
+                alert("Action successfully committed to the ledger!");
                 await fetchCaseDetails(); // Refresh timeline
                 setIsLogModalOpen(false);
-                setLogForm({ action: "Checked Out", locationStatus: "Analyst Desk", notes: "" });
+                setLogForm({ action: "Checked Out", locationStatus: "Analyst Desk", notes: "", transferredTo: "" });
             } else {
                 const data = await response.json();
                 alert(data.error || "Failed to submit log");
@@ -425,6 +447,11 @@ export default function ViewCase() {
                                                 <div className="text-xs text-slate-400 mb-2">
                                                     <span className="font-semibold text-slate-300">{log.performedBy.name}</span> ({log.performedBy.role})
                                                 </div>
+                                                {log.locationStatus && (
+                                                    <div className="text-xs text-blue-400 font-medium mb-2 border-l-2 border-blue-500/50 pl-2 bg-blue-500/5 py-1 rounded-r">
+                                                        {log.locationStatus}
+                                                    </div>
+                                                )}
                                                 <div className="text-xs text-slate-500 italic bg-black/20 p-2 rounded truncate" title={log.notes}>
                                                     "{log.notes}"
                                                 </div>
@@ -475,17 +502,34 @@ export default function ViewCase() {
                                 </select>
                             </div>
 
-                            <div>
-                                <label className="block text-xs font-bold uppercase tracking-widest text-slate-500 mb-2">Location / Status</label>
-                                <input 
-                                    type="text" 
-                                    placeholder="e.g. Forensics Lab Desk 3"
-                                    required
-                                    className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all placeholder:text-slate-600"
-                                    value={logForm.locationStatus}
-                                    onChange={(e) => setLogForm({...logForm, locationStatus: e.target.value})}
-                                />
-                            </div>
+                            {logForm.action === "Transferred" ? (
+                                <div>
+                                    <label className="block text-xs font-bold uppercase tracking-widest text-slate-500 mb-2">Transfer To User</label>
+                                    <select 
+                                        required
+                                        className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all"
+                                        value={logForm.transferredTo}
+                                        onChange={(e) => setLogForm({...logForm, transferredTo: e.target.value})}
+                                    >
+                                        <option value="" disabled>Select a user...</option>
+                                        {allUsers.map(u => (
+                                            <option key={u._id} value={u._id}>{u.name} ({u.role})</option>
+                                        ))}
+                                    </select>
+                                </div>
+                            ) : (
+                                <div>
+                                    <label className="block text-xs font-bold uppercase tracking-widest text-slate-500 mb-2">Location / Status</label>
+                                    <input 
+                                        type="text" 
+                                        placeholder="e.g. Forensics Lab Desk 3"
+                                        required
+                                        className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none transition-all placeholder:text-slate-600"
+                                        value={logForm.locationStatus}
+                                        onChange={(e) => setLogForm({...logForm, locationStatus: e.target.value})}
+                                    />
+                                </div>
+                            )}
 
                             <div>
                                 <label className="block text-xs font-bold uppercase tracking-widest text-slate-500 mb-2">Notes</label>

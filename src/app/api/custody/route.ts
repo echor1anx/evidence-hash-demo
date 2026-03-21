@@ -49,6 +49,19 @@ export async function POST(req: NextRequest) {
             transferredTo: transferredTo || undefined
         });
 
+        // If transferring evidence, ensure the new user has access to the case
+        if (action === "Transferred" && transferredTo && caseItem) {
+            // Check if user is already assigned
+            const isAssigned = caseItem.assignedInvestigators.some(
+                (invId: any) => invId.toString() === transferredTo.toString()
+            );
+            
+            if (!isAssigned) {
+                caseItem.assignedInvestigators.push(transferredTo);
+                await caseItem.save();
+            }
+        }
+
         // Populate user details before returning
         await newLog.populate("performedBy", "name email role");
         if (newLog.transferredTo) {

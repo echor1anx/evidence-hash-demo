@@ -19,6 +19,7 @@ export default function CreateCase() {
     const router = useRouter();
     const { user, isLoading: authLoading } = useAuth();
 
+    const [caseId, setCaseId] = useState("Loading...");
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
     const [suspects, setSuspects] = useState("");
@@ -79,6 +80,18 @@ export default function CreateCase() {
             }
         };
 
+        const fetchNextId = async () => {
+            try {
+                const res = await fetch("/api/cases/next-id");
+                if (res.ok) {
+                    const data = await res.json();
+                    setCaseId(data.nextId);
+                }
+            } catch (err) {
+                console.error("Failed to fetch next case ID:", err);
+            }
+        };
+
         if (!authLoading) {
             if (!user) {
                 router.push("/login");
@@ -86,6 +99,7 @@ export default function CreateCase() {
                 router.push("/dashboard");
             } else {
                 fetchInvestigators();
+                fetchNextId();
             }
         }
     }, [user, authLoading, router]);
@@ -174,6 +188,16 @@ export default function CreateCase() {
                                 Primary Details
                             </h3>
                             
+                            <div className="space-y-2">
+                                <label className="text-xs font-semibold uppercase tracking-widest text-slate-400 ml-1">Case ID (Evidence Identifier)</label>
+                                <input
+                                    type="text"
+                                    value={caseId}
+                                    readOnly
+                                    className="w-full bg-black/40 border border-white/10 rounded-2xl py-3.5 px-4 text-blue-400 font-mono font-bold focus:outline-none cursor-not-allowed"
+                                />
+                            </div>
+
                             <div className="space-y-2">
                                 <label className="text-xs font-semibold uppercase tracking-widest text-slate-400 ml-1">Case Title *</label>
                                 <input

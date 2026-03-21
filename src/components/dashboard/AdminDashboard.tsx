@@ -4,7 +4,8 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { User } from "@/context/AuthContext";
 import { ICase } from "@/models/Case";
-import { Users, Database, ShieldAlert, CheckCircle2, XCircle, Activity, FileText, Clock, ArrowRight } from "lucide-react";
+import { Users, Database, ShieldAlert, CheckCircle2, XCircle, Activity, FileText, Clock, ArrowRight, Search } from "lucide-react";
+import BlockchainVerification from "@/components/BlockchainVerification";
 
 type PendingUser = {
     _id: string;
@@ -22,7 +23,9 @@ export default function AdminDashboard({ user, cases }: { user: User; cases: ICa
     const [pendingUsers, setPendingUsers] = useState<PendingUser[]>([]);
     const [approvedUsers, setApprovedUsers] = useState<PendingUser[]>([]);
     const [actionLoading, setActionLoading] = useState<string | null>(null);
-    const [activeTab, setActiveTab] = useState<'pending' | 'ledgers' | 'agents' | 'health'>('pending');
+    const [activeTab, setActiveTab] = useState<'pending' | 'ledgers' | 'agents' | 'health' | 'verification'>('pending');
+    const [evidenceInput, setEvidenceInput] = useState<string>('');
+    const [evidenceToVerify, setEvidenceToVerify] = useState<string | undefined>(undefined);
     const [systemMetrics, setSystemMetrics] = useState({
         totalUsers: 0,
         pendingApprovals: 0,
@@ -144,6 +147,18 @@ export default function AdminDashboard({ user, cases }: { user: User; cases: ICa
                             <p className="text-2xl font-bold text-white leading-none mt-1">{systemMetrics.systemHealth}</p>
                             <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-2">Network Health</p>
                         </button>
+                        <button 
+                            onClick={() => setActiveTab('verification')}
+                            className={`p-5 rounded-2xl backdrop-blur-xl text-left transition-all outline-none md:col-span-2 focus:ring-2 focus:ring-indigo-500/50 ${
+                                activeTab === 'verification' 
+                                    ? "bg-indigo-500/20 border border-indigo-400 shadow-[0_0_15px_rgba(99,102,241,0.3)] transform scale-[1.02]" 
+                                    : "bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20"
+                            }`}
+                        >
+                            <div className="text-indigo-400 mb-2"><Search size={20} /></div>
+                            <p className="text-sm font-bold text-white leading-none mt-1">Chain Verification</p>
+                            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-2">Verify Evidence</p>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -262,6 +277,11 @@ export default function AdminDashboard({ user, cases }: { user: User; cases: ICa
                                             <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-purple-400 to-indigo-500" />
 
                                             <div className="flex-1 min-w-0">
+                                                {c.caseId && (
+                                                    <div className="text-sm font-bold text-purple-500 mb-1 tracking-wide">
+                                                        {c.caseId}
+                                                    </div>
+                                                )}
                                                 <div className="flex items-center gap-3 mb-2">
                                                     <h3 className="font-bold text-lg text-slate-800 truncate">
                                                         {c.title}
@@ -281,7 +301,7 @@ export default function AdminDashboard({ user, cases }: { user: User; cases: ICa
                                                 
                                                 <div className="flex items-center gap-2 mb-3">
                                                     <code className="text-xs bg-slate-50 text-slate-500 px-2 py-1 rounded border border-slate-100 truncate max-w-[200px] sm:max-w-md">
-                                                        ID: {c._id as unknown as string}
+                                                        ID: {c.caseId || (c._id as unknown as string)}
                                                     </code>
                                                 </div>
 
@@ -375,6 +395,60 @@ export default function AdminDashboard({ user, cases }: { user: User; cases: ICa
                             <p className="text-slate-500 max-w-sm">
                                 All network nodes and cryptographic ledgers are responding nominally. No anomalies detected.
                             </p>
+                        </div>
+                    )}
+
+                    {activeTab === 'verification' && (
+                        <div className="flex flex-col h-full">
+                            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 border-b border-slate-100 pb-6">
+                                <div>
+                                    <h2 className="text-2xl font-bold text-slate-800">Chain Verification</h2>
+                                    <p className="text-sm text-slate-500 mt-1">Directly query the blockchain for evidence immutability.</p>
+                                </div>
+                                <div className="flex items-center gap-2 bg-indigo-50 text-indigo-600 px-3 py-1.5 rounded-full text-xs font-bold border border-indigo-100">
+                                    <Search size={14} />
+                                    Query Network Node
+                                </div>
+                            </div>
+
+                            <div className="max-w-2xl w-full mb-8">
+                                <label htmlFor="evidenceId" className="block text-sm font-bold text-slate-700 mb-2">Case ID (Evidence Identifier)</label>
+                                <div className="flex gap-4">
+                                    <input 
+                                        type="text" 
+                                        id="evidenceId"
+                                        placeholder="e.g. CAS-1001"
+                                        className="flex-1 p-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 transition-all font-mono text-sm text-slate-900 placeholder:text-slate-400"
+                                        value={evidenceInput}
+                                        onChange={(e) => setEvidenceInput(e.target.value)}
+                                    />
+                                    <button 
+                                        onClick={() => setEvidenceToVerify(evidenceInput)}
+                                        className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg shadow-lg shadow-indigo-600/20 transition-all flex items-center gap-2"
+                                    >
+                                        <Search size={18} />
+                                        Verify
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div className="flex-1">
+                                {evidenceToVerify ? (
+                                    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                                        <BlockchainVerification evidenceId={evidenceToVerify} />
+                                    </div>
+                                ) : (
+                                    <div className="flex-1 flex flex-col items-center justify-center text-center py-20 px-4">
+                                        <div className="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mb-6 border border-slate-100 shadow-sm relative">
+                                            <Search size={40} className="text-slate-300 relative z-10" />
+                                        </div>
+                                        <h3 className="text-xl font-bold text-slate-700 mb-2">Awaiting Target</h3>
+                                        <p className="text-slate-500 max-w-sm">
+                                            Enter an Evidence ID above to initiate a query against the blockchain network.
+                                        </p>
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     )}
                 </div>

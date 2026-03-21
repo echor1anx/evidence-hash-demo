@@ -69,7 +69,11 @@ export async function POST(req: NextRequest) {
         const investigatorsArr = Array.isArray(assignedInvestigators) ? assignedInvestigators : [];
         const uniqueInvestigators = Array.from(new Set([...investigatorsArr, user.id]));
 
+        const count = await Case.countDocuments();
+        const generatedCaseId = `CAS-${count + 1}`;
+
         const newCase = await Case.create({
+            caseId: generatedCaseId,
             title,
             description,
             suspects: suspects || [],
@@ -89,8 +93,8 @@ export async function POST(req: NextRequest) {
             for (let i = 0; i < evidence.length; i++) {
                 const e = evidence[i];
                 try {
-                    // Generate unique evidence ID
-                    const evidenceId = `EV-${caseId.slice(0, 8)}-${i}-${uuidv4().slice(0, 8)}`;
+                    // Generate unique evidence ID using Case ID
+                    const evidenceId = i === 0 ? generatedCaseId : `${generatedCaseId}-${i}`;
                     
                     // Register on blockchain
                     const blockchainResult = await registerEvidenceOnChain(

@@ -12,7 +12,8 @@ export default function AnalystDashboard({ user, cases }: { user: User; cases: I
 
     const filteredCases = cases.filter(c => {
         const matchesSearch = c.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                             c._id.toString().toLowerCase().includes(searchQuery.toLowerCase());
+                             c._id.toString().toLowerCase().includes(searchQuery.toLowerCase()) ||
+                             (c.caseId && c.caseId.toLowerCase().includes(searchQuery.toLowerCase()));
         
         if (filterType === "active") {
             return matchesSearch && c.status === "Open";
@@ -88,7 +89,7 @@ export default function AnalystDashboard({ user, cases }: { user: User; cases: I
                                 placeholder="Search ledgers..." 
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full pl-10 pr-4 py-2.5 bg-slate-100 border-transparent focus:bg-white focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200 rounded-xl text-sm font-medium transition-all outline-none"
+                                className="w-full pl-10 pr-4 py-2.5 bg-slate-100 border-transparent focus:bg-white focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200 rounded-xl text-sm font-medium text-slate-900 placeholder:text-slate-400 transition-all outline-none"
                             />
                         </div>
                     </div>
@@ -112,6 +113,11 @@ export default function AnalystDashboard({ user, cases }: { user: User; cases: I
                                         <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-cyan-400 to-blue-500 opacity-0 group-hover:opacity-100 transition-opacity" />
 
                                         <div className="flex-1 min-w-0">
+                                            {c.caseId && (
+                                                <div className="text-sm font-bold text-cyan-500 mb-1 tracking-wide">
+                                                    {c.caseId}
+                                                </div>
+                                            )}
                                             <div className="flex items-center gap-3 mb-2">
                                                 <h3 className="font-bold text-lg text-slate-800 truncate group-hover:text-cyan-600 transition-colors">
                                                     {c.title}
@@ -131,7 +137,7 @@ export default function AnalystDashboard({ user, cases }: { user: User; cases: I
                                             
                                             <div className="flex items-center gap-2 mb-3">
                                                 <code className="text-xs bg-slate-50 text-slate-500 px-2 py-1 rounded border border-slate-100 truncate max-w-[200px] sm:max-w-md">
-                                                    ID: {c._id as unknown as string}
+                                                    ID: {c.caseId || (c._id as unknown as string)}
                                                 </code>
                                             </div>
 

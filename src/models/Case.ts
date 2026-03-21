@@ -1,6 +1,7 @@
 import mongoose, { Schema, Document, Model } from "mongoose";
 
 export interface ICase extends Document {
+    caseId: string;
     title: string;
     description: string;
     suspects: string[];
@@ -25,6 +26,7 @@ export interface ICase extends Document {
 
 const CaseSchema = new Schema<ICase>(
     {
+        caseId: { type: String, required: true, unique: true },
         title: { type: String, required: true },
         description: { type: String, required: true },
         suspects: [{ type: String }],
@@ -62,7 +64,11 @@ const CaseSchema = new Schema<ICase>(
     { timestamps: true }
 );
 
-const Case: Model<ICase> =
-    mongoose.models.Case || mongoose.model<ICase>("Case", CaseSchema);
+// Clear the cached model to prevent missing schema fields during Next.js hot-reloading
+if (mongoose.models.Case) {
+    delete mongoose.models.Case;
+}
+
+const Case: Model<ICase> = mongoose.model<ICase>("Case", CaseSchema);
 
 export default Case;

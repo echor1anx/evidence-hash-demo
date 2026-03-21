@@ -1,51 +1,57 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# CUSTODY.chain - Blockchain Evidence Management System
+
+A state-of-the-art forensic digital evidence management platform built to enforce a strict, transparent, and immutable **Chain of Custody**. By leveraging **Next.js**, **MongoDB**, and **Ethereum Smart Contracts (Solidity)**, this system ensures that every interaction with digital evidence is cryptographically verified and indelibly recorded on the blockchain.
+
+## Features
+
+- **Role-Based Access Control (RBAC):** Five distinct clearances (Admin, Investigator, Custodian, Analyst, Auditor), each offering a beautifully tailored, secure dashboard layout.
+- **Immutable Timeline:** Every evidence interaction (Uploaded, Checked Out, Transferred, Verified, Checked In) is mapped chronologically in an un-editable Chain of Custody log tied directly to an on-chain verification hash. 
+- **Auto-Incrementing Case Identification:** Cases intuitively initialize starting from `CAS-1` and strictly track assignment flows.
+- **Dynamic Case Transfers:** Transfer evidence logs directly to specific forensic analysts or investigators in the system utilizing intuitive selection dropdowns. Doing so automatically grants them clearance to the case ledger in their dashboards.
+- **Client-Side Cryptographic Hashing:** Advanced in-browser SHA-256 evidence hashing capabilities for verifying the integrity of physical or digital assets against the blockchain without ever uploading sensitive files to a central server.
+- **Stunning Dark Mode Aesthetic:** Glassmorphism UI, fluid micro-animations, color-coordinated entity badges, and gradient styling meticulously designed for a premium user experience.
+
+## Technology Stack
+
+- **Frontend:** Next.js 14, React, Tailwind CSS 4, Framer Motion, Lucide React
+- **Backend / Database:** Next.js Route Handlers, MongoDB (Mongoose)
+- **Authentication:** Custom JWT Authorization (`jose`), bcrypt password hashing
+- **Blockchain / Web3:** Ethers.js, Solidity (Deployed on Sepolia Testnet)
 
 ## Getting Started
 
-First, run the development server:
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/echor1anx/evidence-hash-demo.git
+   cd evidence-hash-demo
+   ```
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+2. **Install dependencies:**
+   ```bash
+   npm install
+   ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+3. **Environment Setup (`.env.local`):**
+   ```env
+   # MongoDB Database
+   MONGODB_URI=mongodb+srv://<user>:<password>@cluster.mongodb.net/your-db
+   
+   # JWT & Security
+   JWT_SECRET=your-secure-secret
+   
+   # Web3 / Blockchain
+   NEXT_PUBLIC_RPC_URL=https://sepolia.infura.io/v3/YOUR_INFURA_KEY
+   NEXT_PUBLIC_CONTRACT_ADDRESS=0xYourDeployedSmartContractAddress
+   PRIVATE_KEY=your_wallet_private_key
+   ```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+4. **Run the Development Server:**
+   ```bash
+   npm run dev
+   ```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-
-
-```
-npx create-next-app@latest evidence-hash-demo --typescript
-cd evidence-hash-demo
-npm run dev
-
-App Router → Yes
-src directory → Yes
-Tailwind → Optional (Yes)
-
-```# evidence-hash-demo_SSDR
-# evidence-hash-demo_SSDR
-# evidence-hash-demo_SSDR
-# evidence-hash-demo
+## Workflow & System Roles
+* **Admins**: Approve registrations and oversee active ledger analytics.
+* **Investigators**: Initialize new case ledgers, upload digital evidence assets, and act as primary owners.
+* **Custodians / Analysts**: Receive transferred evidence, investigate or store appropriately, and manipulate case status.
+* **Auditors**: Read-only access to query any ledger across the system to cryptographically verify chain of custody integrity without modification power.
